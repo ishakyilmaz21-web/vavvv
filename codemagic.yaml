@@ -5,14 +5,18 @@ workflows:
     environment:
       flutter: stable
     scripts:
-      - name: (Opsiyonel) android yoksa oluştur
+      - name: Check and create android folder
         script: |
+          echo ">>> Checking android folder..."
           if [ ! -d "android" ]; then
+            echo ">>> Android folder not found, creating..."
             flutter create .
+          else
+            echo ">>> Android folder already exists."
           fi
-      - name: Bağımlılıkları indir
+      - name: Get dependencies
         script: flutter pub get
-      - name: Debug APK derle
+      - name: Build debug APK
         script: flutter build apk --debug
     artifacts:
       - build/app/outputs/flutter-apk/*.apk
