@@ -5,18 +5,20 @@ workflows:
     environment:
       flutter: stable
     scripts:
-      - name: Check and create android folder
+      - name: Create android folder if missing
         script: |
-          echo ">>> Checking android folder..."
           if [ ! -d "android" ]; then
-            echo ">>> Android folder not found, creating..."
             flutter create .
-          else
-            echo ">>> Android folder already exists."
           fi
-      - name: Get dependencies
-        script: flutter pub get
-      - name: Build debug APK
-        script: flutter build apk --debug
+      - name: Flutter clean & pub get
+        script: |
+          flutter clean
+          flutter pub get
+      - name: Stop gradle daemons (safety)
+        script: |
+          (cd android && ./gradlew --stop || true)
+      - name: Build debug APK (no-daemon + stacktrace)
+        script: |
+          (cd android && ./gradlew assembleDebug --no-daemon --stacktrace --info)
     artifacts:
-      - build/app/outputs/flutter-apk/*.apk
+      - android/app/build/outputs/**/*.apk
