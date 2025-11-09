@@ -6,24 +6,21 @@ workflows:
       flutter: stable
 
     scripts:
-      - name: Move to project root
+      - name: Go to Flutter project folder
         script: |
-          cd $CM_BUILD_DIR
+          cd $CM_BUILD_DIR/ezan_vakti_plus_repo
           echo ">>> Current directory:"
           pwd
           echo ">>> Files here:"
           ls -l
 
-      - name: Check and create android folder if missing
+      - name: Create android folder if missing
         script: |
           if [ ! -d "android" ]; then
-            echo ">>> Android folder not found, creating..."
             flutter create .
-          else
-            echo ">>> Android folder exists."
           fi
 
-      - name: Flutter clean & get dependencies
+      - name: Clean and get dependencies
         script: |
           flutter clean
           flutter pub get
@@ -33,4 +30,4 @@ workflows:
           flutter build apk --debug
 
     artifacts:
-      - build/app/outputs/flutter-apk/*.apk
+      - ezan_vakti_plus_repo/build/app/outputs/flutter-apk/*.apk
