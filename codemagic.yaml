@@ -4,21 +4,33 @@ workflows:
     max_build_duration: 60
     environment:
       flutter: stable
+
     scripts:
-      - name: Create android folder if missing
+      - name: Move to project root
+        script: |
+          cd $CM_BUILD_DIR
+          echo ">>> Current directory:"
+          pwd
+          echo ">>> Files here:"
+          ls -l
+
+      - name: Check and create android folder if missing
         script: |
           if [ ! -d "android" ]; then
+            echo ">>> Android folder not found, creating..."
             flutter create .
+          else
+            echo ">>> Android folder exists."
           fi
-      - name: Flutter clean & pub get
+
+      - name: Flutter clean & get dependencies
         script: |
           flutter clean
           flutter pub get
-      - name: Stop gradle daemons (safety)
+
+      - name: Build debug APK
         script: |
-          (cd android && ./gradlew --stop || true)
-      - name: Build debug APK (no-daemon + stacktrace)
-        script: |
-          (cd android && ./gradlew assembleDebug --no-daemon --stacktrace --info)
+          flutter build apk --debug
+
     artifacts:
-      - android/app/build/outputs/**/*.apk
+      - build/app/outputs/flutter-apk/*.apk
