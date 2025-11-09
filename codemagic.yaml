@@ -6,19 +6,36 @@ workflows:
       flutter: stable
 
     scripts:
-      - name: Go to Flutter project folder
+      - name: Go to project root
         script: |
-          cd $CM_BUILD_DIR/ezan_vakti_plus_repo
-          echo ">>> Current directory:"
+          cd $CM_BUILD_DIR
+          echo ">>> PWD:"
           pwd
-          echo ">>> Files here:"
-          ls -l
+          echo ">>> Root files:"
+          ls -la
 
-      - name: Create android folder if missing
+      - name: Ensure full Android structure (recreate if incomplete)
         script: |
+          set -e
+          NEED_RECREATE=0
           if [ ! -d "android" ]; then
-            flutter create .
+            echo ">>> android/ yok, recreate gerekli."
+            NEED_RECREATE=1
+          elif [ ! -f "android/app/src/main/AndroidManifest.xml" ]; then
+            echo ">>> AndroidManifest.xml yok, android klasörü eksik/bozuk."
+            NEED_RECREATE=1
           fi
+
+          if [ "$NEED_RECREATE" = "1" ]; then
+            echo ">>> android/ klasörü yeniden oluşturuluyor..."
+            rm -rf android
+            flutter create .
+          else
+            echo ">>> android/ yapısı tam görünüyor."
+          fi
+
+          echo ">>> android/ içeriği:"
+          find android -maxdepth 3 -type f | sed 's/^/ - /'
 
       - name: Clean and get dependencies
         script: |
@@ -27,7 +44,13 @@ workflows:
 
       - name: Build debug APK
         script: |
+          # Gerekirse V2 embedding tag'i ekliyoruz (idempotent, zararsız)
+          if ! grep -q 'flutterEmbedding' android/app/src/main/AndroidManifest.xml; then
+            awk '1; /<\/application>/ && !x {print "    <meta-data android:name=\"flutterEmbedding\" android:value=\"2\" />"; x=1}' \
+              android/app/src/main/AndroidManifest.xml > /tmp/AndroidManifest.xml && mv /tmp/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+          fi
+
           flutter build apk --debug
 
     artifacts:
-      - ezan_vakti_plus_repo/build/app/outputs/flutter-apk/*.apk
+      - build/app/outputs/flutter-apk/*.apk
