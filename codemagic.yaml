@@ -1,1 +1,24 @@
-{"detail":"File stream access denied."}
+workflows:
+  android-debug:
+    name: Build Android debug APK
+    max_build_duration: 60
+    environment:
+      flutter: stable
+    scripts:
+      - flutter --version
+      - flutter create .
+      - flutter pub get
+      - |
+        MANIFEST=android/app/src/main/AndroidManifest.xml
+        if ! grep -q "INTERNET" "$MANIFEST"; then
+          sed -i 's#<manifest#<manifest\n    <uses-permission android:name="android.permission.INTERNET"/>#' "$MANIFEST"
+        fi
+        if ! grep -q "ACCESS_FINE_LOCATION" "$MANIFEST"; then
+          sed -i 's#<manifest#<manifest\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>#' "$MANIFEST"
+        fi
+        if ! grep -q "ACCESS_COARSE_LOCATION" "$MANIFEST"; then
+          sed -i 's#<manifest#<manifest\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>#' "$MANIFEST"
+        fi
+      - flutter build apk --debug
+    artifacts:
+      - build/app/outputs/flutter-apk/app-debug.apk
