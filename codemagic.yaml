@@ -34,6 +34,13 @@ workflows:
           flutter clean
           flutter pub get
 
+      # Yeni eklenen adım ↓↓↓
+      - name: Print Gradle & Kotlin info
+        script: |
+          ./gradlew -v || true
+          echo "KOTLIN_VERSION from root build.gradle:"
+          grep -n "kotlin_version" android/build.gradle || true
+
       - name: Build debug APK
         script: |
           # Add flutterEmbedding=2 meta-data if missing (safe/idempotent)
