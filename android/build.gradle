@@ -1,16 +1,15 @@
 buildscript {
-    ext.kotlin_version = '1.9.0'
+    ext.kotlin_version = "1.9.10"
+
     repositories {
         google()
         mavenCentral()
     }
+
     dependencies {
-        // Android Gradle Plugin (wrapper'ınız 8.2 olduğu için AGP 8.2.x seçiyoruz)
-        classpath 'com.android.tools.build:gradle:8.2.2'
-        // Kotlin
+        classpath "com.android.tools.build:gradle:8.2.1"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        // Flutter Gradle plugin
-        classpath 'dev.flutter:flutter-gradle-plugin'
+        classpath "dev.flutter:flutter-gradle-plugin"
     }
 }
 
@@ -21,7 +20,6 @@ allprojects {
     }
 }
 
-// (İsteğe bağlı ama faydalı) ortak build klasörü ayarları
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
