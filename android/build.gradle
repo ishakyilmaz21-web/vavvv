@@ -1,12 +1,13 @@
-// android/build.gradle  — root project için minimal yapı (Gradle 8 uyumlu)
-
 buildscript {
+    ext.kotlin_version = '1.9.24'        // Güvenli, güncel Kotlin
     repositories {
         google()
         mavenCentral()
     }
-    // DİKKAT: BURADA *dependencies { classpath ... }* OLMAYACAK!
-    // Flutter/Android Gradle plugin classpath'leri artık burada tanımlanmıyor.
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.2.1"     // AGP
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
 }
 
 allprojects {
@@ -16,7 +17,6 @@ allprojects {
     }
 }
 
-// İsteğe bağlı: "gradle clean" için yardımcı task
-tasks.register("clean", Delete) {
+task clean(type: Delete) {
     delete rootProject.buildDir
 }
