@@ -1,37 +1,46 @@
-plugins {
-    id "com.android.application"
-    id "org.jetbrains.kotlin.android"
-    // Flutter için gerekli yeni embedding sistemi
-    id "dev.flutter.flutter-gradle-plugin"
-}
+apply plugin: "com.android.application"
+apply plugin: "kotlin-android"
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    namespace "com.ezanvakti.plus" // Manifest ve MainActivity.kt ile aynı olmalı
-    compileSdk 34
+    namespace "com.ezanvakti.plus"   // Manifest’teki package ile uyumlu
+    compileSdkVersion 34
 
     defaultConfig {
         applicationId "com.ezanvakti.plus"
-        minSdk 21
-        targetSdk 34
+        minSdkVersion 21
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
 
     buildTypes {
         release {
-            // Şimdilik debug imzası kullan
-            signingConfig signingConfigs.debug
+            // İlk etapta shrink/minify kapalı—sonra açarız
             minifyEnabled false
             shrinkResources false
+            signingConfig signingConfigs.debug
         }
+        debug {
+            // debug varsayılan
+        }
+    }
+
+    // Java/Kotlin hedefleri
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
 flutter {
-    // lib dizinini işaret et
     source "../.."
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.10"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
