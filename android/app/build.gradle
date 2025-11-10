@@ -1,12 +1,12 @@
 plugins {
     id "com.android.application"
     id "org.jetbrains.kotlin.android"
-    // Flutter için yeni plug-in
+    // Flutter için gerekli yeni embedding sistemi
     id "dev.flutter.flutter-gradle-plugin"
 }
 
 android {
-    namespace "com.ezanvakti.plus"   // Manifeste ve Kotlin package’a uyumlu olsun
+    namespace "com.ezanvakti.plus" // Manifest ve MainActivity.kt ile aynı olmalı
     compileSdk 34
 
     defaultConfig {
@@ -19,7 +19,7 @@ android {
 
     buildTypes {
         release {
-            // Şimdilik debug imzası ile
+            // Şimdilik debug imzası kullan
             signingConfig signingConfigs.debug
             minifyEnabled false
             shrinkResources false
@@ -28,7 +28,7 @@ android {
 }
 
 flutter {
-    // lib/ üstündeyken doğru kaynak yolu
+    // lib dizinini işaret et
     source "../.."
 }
 
