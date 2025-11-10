@@ -3,16 +3,19 @@ workflows:
     name: Build Flutter debug APK
     max_build_duration: 60
     environment:
-      flutter: stable
+      flutter: "3.24.0"   # V2 embedding uyumlu sabit sürüm
+      java: "17"
 
     scripts:
       - name: Go to project root
         script: |
-          cd $CM_BUILD_DIR
+          cd "$CM_BUILD_DIR"
           echo ">>> PWD:"
           pwd
           echo ">>> Root files:"
           ls -la
+          echo ">>> Flutter version:"
+          flutter --version
 
       - name: Ensure full Android structure (recreate if incomplete)
         script: |
@@ -34,7 +37,7 @@ workflows:
             echo ">>> android/ yapısı tam görünüyor."
           fi
 
-          echo ">>> android/ içeriği:"
+          echo ">>> android/ içeriği (ilk 3 seviye):"
           find android -maxdepth 3 -type f | sed 's/^/ - /'
 
       - name: Clean and get dependencies
@@ -44,11 +47,15 @@ workflows:
 
       - name: Build debug APK
         script: |
-          # Gerekirse V2 embedding tag'i ekliyoruz (idempotent, zararsız)
+          # Manifest'te flutterEmbedding=2 yoksa ekle (zararsız/idempotent)
           if ! grep -q 'flutterEmbedding' android/app/src/main/AndroidManifest.xml; then
-            awk '1; /<\/application>/ && !x {print "    <meta-data android:name=\"flutterEmbedding\" android:value=\"2\" />"; x=1}' \
-              android/app/src/main/AndroidManifest.xml > /tmp/AndroidManifest.xml && mv /tmp/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+            awk '1; /<\/application>/ && !x {print "        <meta-data android:name=\"flutterEmbedding\" android:value=\"2\" />"; x=1}' \
+              android/app/src/main/AndroidManifest.xml > /tmp/AndroidManifest.xml
+            mv /tmp/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
           fi
+
+          # Bilgi amaçlı: MainActivity konumu doğru mu?
+          test -f android/app/src/main/kotlin/com/ezanvakti/plus/MainActivity.kt && echo "MainActivity.kt bulundu."
 
           flutter build apk --debug
 
