@@ -1,4 +1,4 @@
-// android/settings.gradle — Flutter 3.x + Gradle 8.2 uyumlu
+// android/settings.gradle — Gradle 8.2 + Kotlin 1.9.24 uyumlu
 
 pluginManagement {
     repositories {
@@ -8,22 +8,24 @@ pluginManagement {
     }
     plugins {
         id "com.android.application" version "8.2.2"
-        id "org.jetbrains.kotlin.android" version "1.9.10"
-        id "dev.flutter.flutter-gradle-plugin" version "8.2.2"
+        id "org.jetbrains.kotlin.android" version "1.9.24"
+        // ÖNEMLİ: Flutter plugini için sürüm yazmıyoruz; includeBuild ile Flutter SDK’dan geliyor
+        id "dev.flutter.flutter-gradle-plugin"
     }
 }
 
-// Flutter SDK yolunu al
+// Flutter SDK yolunu oku
 def localProps = new Properties()
 def localPropsFile = new File(rootProject.projectDir, "local.properties")
 if (localPropsFile.exists()) {
-    localPropsFile.withReader("UTF-8") { reader -> localProps.load(reader) }
+    localPropsFile.withReader("UTF-8") { r -> localProps.load(r) }
 }
 def flutterSdkPath = localProps.getProperty("flutter.sdk")
 if (flutterSdkPath == null) {
-    throw new GradleException("Flutter SDK bulunamadı. local.properties içinde flutter.sdk tanımlayın.")
+    throw new GradleException("Flutter SDK bulunamadı. android/local.properties içinde flutter.sdk=... tanımlayın.")
 }
 
+// Flutter’ın gradle araçlarını SDK’dan dahil et
 includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
 rootProject.name = "ezanvakti_plus"
