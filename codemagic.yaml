@@ -3,42 +3,31 @@ workflows:
     name: Build Flutter debug APK
     max_build_duration: 60
     environment:
-      flutter: "3.24.0"   # V2 embedding uyumlu sabit sürüm
-      java: "17"
+      flutter: stable
 
     scripts:
       - name: Go to project root
         script: |
-          cd "$CM_BUILD_DIR"
-          echo ">>> PWD:"
-          pwd
-          echo ">>> Root files:"
+          cd $CM_BUILD_DIR
+          echo "PWD: $PWD"
           ls -la
-          echo ">>> Flutter version:"
-          flutter --version
 
       - name: Ensure full Android structure (recreate if incomplete)
         script: |
           set -e
           NEED_RECREATE=0
           if [ ! -d "android" ]; then
-            echo ">>> android/ yok, recreate gerekli."
             NEED_RECREATE=1
           elif [ ! -f "android/app/src/main/AndroidManifest.xml" ]; then
-            echo ">>> AndroidManifest.xml yok, android klasörü eksik/bozuk."
             NEED_RECREATE=1
           fi
-
           if [ "$NEED_RECREATE" = "1" ]; then
-            echo ">>> android/ klasörü yeniden oluşturuluyor..."
+            echo ">> Recreating android/"
             rm -rf android
             flutter create .
           else
-            echo ">>> android/ yapısı tam görünüyor."
+            echo ">> android/ looks OK"
           fi
-
-          echo ">>> android/ içeriği (ilk 3 seviye):"
-          find android -maxdepth 3 -type f | sed 's/^/ - /'
 
       - name: Clean and get dependencies
         script: |
@@ -47,14 +36,14 @@ workflows:
 
       - name: Build debug APK
         script: |
-          # Manifest'te flutterEmbedding=2 yoksa ekle (zararsız/idempotent)
+          # Add flutterEmbedding=2 meta-data if missing (safe/idempotent)
           if ! grep -q 'flutterEmbedding' android/app/src/main/AndroidManifest.xml; then
-            awk '1; /<\/application>/ && !x {print "        <meta-data android:name=\"flutterEmbedding\" android:value=\"2\" />"; x=1}' \
-              android/app/src/main/AndroidManifest.xml > /tmp/AndroidManifest.xml
-            mv /tmp/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
+            awk '1; /<\/application>/ && !x {print "    <meta-data android:name=\"flutterEmbedding\" android:value=\"2\" />"; x=1}' \
+              android/app/src/main/AndroidManifest.xml > /tmp/AndroidManifest.xml \
+              && mv /tmp/AndroidManifest.xml android/app/src/main/AndroidManifest.xml
           fi
 
-          # Bilgi amaçlı: MainActivity konumu doğru mu?
+          # Info: ensure MainActivity exists at the expected path
           test -f android/app/src/main/kotlin/com/ezanvakti/plus/MainActivity.kt && echo "MainActivity.kt bulundu."
 
           flutter build apk --debug
